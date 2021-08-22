@@ -1,89 +1,110 @@
 			DEVICE ZXSPECTRUM48			; sjasmplus directive for SAVESNA at end
 
-Stack_Top:		EQU 0xFFF0
-Code_Start:		EQU 0x8000
+Stack_Top:		    EQU 0xFF00
+Code_Start:		    EQU 0x8000
 
-			ORG Code_Start
+			        ORG Code_Start
 
-            JR INIC
-TEXT        DEFB "Prueba de Texto.",0
-SEED1       DEFB 23670
-SEED2       DEFB 23671
-COORDSX     EQU 23677  
-COORDSY     EQU 23678  
-CHARS       EQU 23606
-ADJ         DEFB 6
-PRCC        EQU 23681
-INIC        ;LD A,(SEED1)
-            ;LD H,A
-            ;LD A,(SEED2)
-            ;LD L,A
+;char_print:         EQU 60000
+coords_x:           EQU 23677  
+coords_y:           EQU 23678  
+CHARS:              EQU 23606
+prcc_addr:          EQU 23681
+long_print_code:    EQU 55
 
-            LD HL,TEXT  ; cargo la direccion del texto en hl
-            LD A,50
-            LD (COORDSX),A ; x = 50
-            LD (COORDSY),A ; y = 50
+                    JR init_routine
+string_text:        DB "Pablo",0
+adjust:             DEFB 6
+init_routine:       
+                    ;LD A,(SEED1)
+                    ;LD H,A
+                    ;LD A,(SEED2)
+                    ;LD L,A
 
-PRAT        LD A,(HL) ; busco el primer caracter de la cadena.
-            CP 0 ; si es cero...
-            RET Z ; ...salgo
-            LD (PRCC),A 
-            PUSH HL
-            CALL SPRIN
-            POP HL
-            LD A,(ADJ)
-            LD C,A
-            LD B,0
-            LD HL,(COORDSX)
-LOOP2       INC (HL)
-            DEC BC
-            LD A,B
-            OR C
-            JR NZ,LOOP2
-            POP HL
-            INC HL
-            JR PRAT
+                    ;LD DE, char_print
+                    ;LD HL, machine_code_fx
+                    ;LD BC, long_print_code
+                    ;LDIR
 
-; Rutina PRINT
+                    LD HL, string_text  ; cargo la direccion del texto en hl
+                    LD A, 50
+                    LD (coords_x), A ; x = 50
+                    LD (coords_y), A ; y = 50
 
-SPRIN       LD HL,(PRCC)
-            LD H,0
-            LD DE,(COORDSX)
-            PUSH DE
-            LD DE,(CHARS)
-            ADD HL,HL
-            ADD HL,HL
-            ADD HL,HL
-            ADD HL,DE
-            POP DE
-            LD B,8
-LP3         LD A,(HL)
-            PUSH BC 
-            LD B,8
-LP2         PUSH BC
-            RLA
-            JR NC,LP1
-            LD B,D
-            LD C,E
-            PUSH DE
-            PUSH HL
-            PUSH AF
-            CALL 8933
-            POP AF
-            POP HL
-            POP DE
-LP1         INC E
-            POP BC
-            DJNZ LP2
-            DEC D
-            POP BC
-            INC HL
-            LD A,248
-            ADD A,E
-            DJNZ LP3
-            RET
-; FIN RUTINA PRINT
+string_main_loop:   
+                    LD A,(HL) ; busco el primer caracter de la cadena.
+                    CP 0 ; si es cero...
+                    RET Z ; ...salgo
 
+                    ; Comienzo ciclo principal.
+                    LD (prcc_addr), A 
+                    PUSH HL
+                    CALL char_print 
+                    LD A, 50         ; FIX BERRETA
+                    LD (coords_y), A ; FIX BERRETA
+                    LD A, (adjust)
+                    LD C,A
+                    LD B,0
+                    LD HL, coords_x
+sum_adj_2_hl:       
+                    INC (HL)
+                    DEC BC
+                    LD A,B
+                    OR C
+                    JR NZ, sum_adj_2_hl ; ciclo para sumar el ajuste al contenido de HL
+                    POP HL
+                    INC HL ; Incremento HL para el proximo caracter de la cadena.
+                    JR string_main_loop
+
+; RUTINA PRINT
+;machine_code_fx:    DB 42,129,92,38,0,237,91
+;                    DB 125,92,213,237,91,54,92,41,41,41
+;                    DB 25,209,6,8,126,197,6,8,197,23
+;                    DB 48,11,66,75,213,229,245,205,229
+;                    DB 34,241,225,209,28,193,16,237,21
+;                    DB 193,35,62,248,131,95,16,224,201
+
+char_print:
+                    LD   HL,(prcc_addr) 
+                    LD   H, 0
+                    LD   DE,(coords_x) 
+                    PUSH DE     
+                    LD   DE,(CHARS) 
+                    ADD  HL,HL  
+                    ADD  HL,HL  
+                    ADD  HL,HL  
+                    ADD  HL,DE  
+                    POP  DE     
+                    LD B, 8
+loop_3:
+                    LD   A,(HL) 
+                    PUSH BC     
+                    LD B, 8
+loop_2:
+                    PUSH BC     
+                    RLA         
+                    JR NC,loop_1 
+                    LD B,D      
+                    LD C,E    
+                    PUSH DE     
+                    PUSH HL     
+                    PUSH AF     
+                    CALL $22E5  
+                    POP  AF     
+                    POP  HL     
+                    POP  DE     
+loop_1:
+                    INC  E      
+                    POP  BC     
+                    DJNZ loop_2  
+                    DEC  D      
+                    POP  BC         
+                    INC  HL     
+                    LD   A, 248
+                    ADD  A,E    
+                    LD   E,A    
+                    DJNZ loop_3  
+                    RET     
 
 Code_Length:		EQU $-Code_Start+1
 
