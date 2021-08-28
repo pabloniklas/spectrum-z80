@@ -11,17 +11,14 @@ CHARS:              EQU 23606
 prcc_addr:          EQU 23681
 
                     JR init_routine
-string_text:        DB "Hola mundo.",0
 adjust:             DEFB 6
 posx:               DEFB 0
 posy:               DEFB 50
 init_routine:
-                    ;LD A,(SEED1)
-                    ;LD H,A
-                    ;LD A,(SEED2)
-                    ;LD L,A
-
-                    LD HL, string_text  ; cargo la direccion del texto en hl
+                    LD A,(SEED1)
+                    LD H,A
+                    LD A,(SEED2)
+                    LD L,A
 string_main_loop:
                     ; Parche por modificacion que hace la ROM.
                     LD A, (posx)
