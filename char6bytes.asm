@@ -5,8 +5,8 @@ Code_Start:		    EQU 0x8000
 
 			        ORG Code_Start
 
-SEED1								EQU 23670
-SEED2								EQU 23671
+SEED1               EQU 23670
+SEED2               EQU 23671
 coords_x:           EQU 23677
 coords_y:           EQU 23678
 CHARS:              EQU 23606
