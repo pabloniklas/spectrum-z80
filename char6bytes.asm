@@ -5,6 +5,8 @@ Code_Start:		    EQU 0x8000
 
 			        ORG Code_Start
 
+SEED1								EQU 23670
+SEED2								EQU 23671
 coords_x:           EQU 23677
 coords_y:           EQU 23678
 CHARS:              EQU 23606
@@ -16,9 +18,9 @@ posx:               DEFB 0
 posy:               DEFB 50
 init_routine:
                     LD A,(SEED1)
-                    LD H,A
-                    LD A,(SEED2)
                     LD L,A
+                    LD A,(SEED2)
+                    LD H,A
 string_main_loop:
                     ; Parche por modificacion que hace la ROM.
                     LD A, (posx)
